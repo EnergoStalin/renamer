@@ -2,10 +2,10 @@
 
 Log::Log()
 {
-
+	this->filename.reserve(50);
 }
 
-Log::Log(std::string const file)
+Log::Log(std::string const file) : Log()
 {
 	this->open(file);
 }
@@ -13,9 +13,12 @@ Log::Log(std::string const file)
 void Log::open(std::string const file)
 {
 	this->close();
-		this->_os.open(file,std::ios::out);
+		this->_os.open(file,std::ios::out | std::ios::trunc);
 		if(!this->_os.is_open())
-			this->filename = file;
+		{
+			this->filename.clear();
+			this->filename += file;
+		}
 }
 
 void Log::write(std::string const msg)

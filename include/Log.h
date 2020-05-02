@@ -18,4 +18,4 @@ public:
 	~Log();
 };
 
-#include "Log.cpp"
+#include "../src/Log.cpp"
