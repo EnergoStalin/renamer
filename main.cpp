@@ -2,7 +2,7 @@
 
 int main(int argc, char const *argv[])
 {
-	renamer _ren(argc,argv);
+	renamer _ren;
 
-	return 0;
+	return _ren.run(argc,argv);
 }

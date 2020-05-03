@@ -19,7 +19,6 @@ class renamer {
 	std::string bDir; //store bad files
 	std::string cDir; //processing directory
 	//total
-	uint64_t total = 0;
 	uint64_t total_good = 0;
 	uint64_t total_bad = 0;
 	enum RUNTIME_ERROR_CODE
@@ -29,7 +28,7 @@ class renamer {
 	};
 	enum PARSE_ARGUMENTS_RETURN_CODE
 	{
-		ERROR_NOT_ENOUGH_ARGS = 0,
+		ERROR_NOT_ENOUGH_ARGS = 1,
 		ERROR_BAD_DIR_NOT_SPECIFIED,
 		ERROR_GOOD_DIR_NOT_SPECIFIED,
 		ERROR_NO_IGNORED_FILES_SPECIFIED,
@@ -37,18 +36,22 @@ class renamer {
 		ERROR_NO_FILES_EXTENSION_SPECIFIED,
 		ERROR_EMPTY_FILE,
 		ERROR_ARGUMENT_ORDER,
+		CANT_CREATE_DIR,
+		CANT_OPEN_LOG,
 		PARSE_SUCCESS,
 		STOP
 	};
 	PARSE_ARGUMENTS_RETURN_CODE parseArguments(int,const char**);
 	std::string processFilename(const char*,size_t);
 	bool check_param();
+	bool validate_name(std::string&);
 	void fileToVector(const char*,std::vector<std::string>&,char);
 	void stringToVector(std::string s,std::vector<std::string> &v,char delim);
-	void processDir();
+	int processDir();
 	void Usage();
 public:
-	renamer(int,char const**);
+	int run(int&,char const**);
+	renamer();
 	~renamer();
 	
 };

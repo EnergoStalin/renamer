@@ -19,10 +19,10 @@ void saddch(char *s,char c)
 	s[len+1] = '\0';
 }
 
-void generateFilename()
+void generateFilename(const char *prefix)
 {
 	filename[0] = 0;
-	strcat(filename,FILEDIR);
+	strcat(filename,prefix);
 	strcat(filename,"/n");
 	
 	saddch(filename,first[rand()%4]);
@@ -69,7 +69,7 @@ int main(int argc, char const *argv[])
 	
 	for(int i = 0; i < count; i++)
 	{
-		generateFilename();
+		generateFilename(argv[2]);
 		ptr = std::fopen(filename,"w");
 		fclose(ptr);
 		/*CreateFileA(
