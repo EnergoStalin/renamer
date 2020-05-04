@@ -164,7 +164,7 @@ int renamer::processDir()
 bool renamer::validate_name(std::string &str,size_t defis)
 {
 	int length = str.length();
-	if(defis <= 0) return false;
+	if(defis == 1) return false;
 	if(length == 9)
 	{
 		if(str.find("05") == 0)
