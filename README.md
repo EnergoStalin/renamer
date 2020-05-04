@@ -4,17 +4,18 @@
 *renamer [**DIR**] ~~-g~~ [**GOOD DIR**] ~~-b~~ [**BAD DIR**] -e [**FILE EXTENSIONS**] ~~-i~~ [**IGNORED FILES**] ~~-wl~~ [**FORMAT**] ~~-nr~~*
 ## Arguments
 - Renames files in specified directory by pattern and puts it in specified bad folder or specified good folder.
-- If good dir not specified puts renamed files at the same folder, if bad dir not specified creates error dir in working directory and puts bad files in it.
+- If good dir not specified puts renamed files at the same folder may reprocess it many times(not recommended), if bad dir not specified creates error dir in working directory and puts bad files in it.
 - File extensions must starts with dot and be in file with -ef or be splitted by ',' with -e flag.
 - -wl Flag enable logging who creates 'logs' directory and puts to it all logs who been writed. You may specify log filename. Format you can see here [strftime](http://www.cplusplus.com/reference/ctime/strftime/).
 - -i Specifies the same as -e flag ignored files also may be read from file whos also ignored if extension match such as '.txt'
 - -nr Flag used for debug it disbales rename and leaves only 'preprocessing' filenames.
+> Optional parameters crossed out.
 > **_Warning!!!_ I recommend this arguments order and forbid variate it. -nr Position doesen't matter.**
 ## Conditions
 #### Preprocessing
-> Preprocessing remove all charaters from name exclude '-' and replace associations with it
+> Preprocessing remove all charaters from name exclude '-' and replace associations with it.
 
-```
+```c++
 switch (name[i]) //name is original (const char *) string
 {
 	case 'b': newname += '6'; break;
@@ -29,7 +30,13 @@ switch (name[i]) //name is original (const char *) string
 }
 ```
 
-###### Good file criteria
-> Example *005456349-12** or **005456349-1**\
-- If has exactly one defis chareter
-- If length without ~~extension~~ '_.txt_' equals 9 and starts with 05 we add in the begginig 0
+#### Good file criteria
+> Example _after preprocessing stage_ *005456349-12** or **005456349-1**
+- If has exactly one defis chareter.
+- If length without ~~extension~~ '_.txt_' equals 9 and starts with *'05'* if starts with *'05'* inserts *'0'* in the beginning.
+- Or if length equals 11 and starts with *'005'*
+#### Bad file criteria
+> Example _after preprocessing stage_ *0054456349-12** or **0054563493-1**
+- If has more one defis chareter or zero.
+- If length without ~~extension~~ '_.txt_' equals less than 9 and dont starts with *'05'*.
+- Or if length not equals 11 and not starts with *'005'*

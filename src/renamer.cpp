@@ -172,7 +172,7 @@ bool renamer::validate_name(std::string &str,size_t defis)
 			str.insert(0,"0");
 		}
 	}
-	else if(length > 10 || length < 12)
+	else if(length == 11)
 	{
 		if(str[10] == '-')
 		{
