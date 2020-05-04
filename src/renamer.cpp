@@ -296,7 +296,8 @@ renamer::PARSE_ARGUMENTS_RETURN_CODE renamer::parseArguments(int argc, const cha
 			{
 				if(strcmp(argv[i]+1,"wl") == 0)
 				{
-					std::string log('\0',50);
+					std::string log;
+					log.reserve(50);
 					time_t _time = time(0);
 					char time_string[256];
 					if((i+1) < argc && argv[i+1][0] != '-')

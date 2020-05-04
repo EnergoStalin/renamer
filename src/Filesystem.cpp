@@ -70,9 +70,11 @@ void Filesystem::_rename(const char *oldname,const char *newname)
 		case ENOENT:
 			throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: Path doesent exist.",ENOENT);
 		break;
+		#if defined(__linux__) || defined(__unix__)
 		case ENOTNAM:
 			throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: Not in the same disk.",ENOTNAM);
 		break;
+		#endif
 	}
 }
 
