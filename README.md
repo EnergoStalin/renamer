@@ -1,7 +1,7 @@
 # renamer
 ##Usage:
 
-`renamer [**DIR**] ~~-g~~ [**GOOD DIR**] ~~-b~~ [**BAD DIR**] -e [**FILE EXTENSIONS**] ~~-i~~ [**IGNORED FILES**] ~~-wl~~ [**FORMAT**] -nr`
+renamer [**DIR**] ~~-g~~ [**GOOD DIR**] ~~-b~~ [**BAD DIR**] -e [**FILE EXTENSIONS**] ~~-i~~ [**IGNORED FILES**] ~~-wl~~ [**FORMAT**] -nr
 - Renames files in specified directory by pattern and puts it in specified bad folder or specified good folder.
 - If good dir not specified puts renamed files at the same folder, if bad dir not specified creates error dir in working directory and puts bad files in it.
 - File extensions must starts with dot and be in file with -ef or be splitted by ',' with -e flag.
