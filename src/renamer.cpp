@@ -4,7 +4,8 @@ renamer::renamer()
 {
 	this->gDir.reserve(100);
 	this->bDir.reserve(100);
-	this->bDir = "error/";
+	this->bDir = "error";
+	this->bDir += Filesystem::slash;
 	this->cDir.reserve(100);
 	this->ignore.push_back("n$$$.pdf");
 }
@@ -105,16 +106,29 @@ int renamer::processDir()
 	try
 	{
 		if(gDir.length() != 0)
+		{
+			log.clear();
 			Filesystem::_mkdir((cDir+gDir).c_str());
+			(((log += "[Warinig]: Directory '") += cDir) += gDir) += "' dont exist creating...\n";
+			std::cout << log;
+			Filesystem::log.write(log);
+		}
+		log.clear();
 		Filesystem::_mkdir((cDir+bDir).c_str());
+		(((log += "[Warinig]: Directory '") += cDir) += bDir) += "' dont exist creating...\n";
+		std::cout << log;
+		Filesystem::log.write(log);
 	}
 	catch(Filesystem::FilesystemException &ex)
 	{
-		std::cerr << ex.what() << '\n';
-		Filesystem::log.write(ex.what());
-
-		return CANT_CREATE_DIR;
+		if(ex.getCode() == -1)
+		{
+			std::cerr << ex.what() << '\n';
+			Filesystem::log.write(ex.what());
+			return CANT_CREATE_DIR;
+		}
 	}
+	log.clear();
 
 
 	
@@ -152,7 +166,15 @@ int renamer::processDir()
 		if(it == this->ext.end()) { continue; }
 
 		if(this->rename == true)
-			Filesystem::_rename((this->cDir+dent->d_name).c_str(), this->processFilename(dent->d_name,_ext.length()).c_str());
+			try
+			{
+				Filesystem::_rename((this->cDir+dent->d_name).c_str(), this->processFilename(dent->d_name,_ext.length()).c_str());
+			}
+			catch(Filesystem::FilesystemException &ex)
+			{
+				std::cout << ex.what();
+				Filesystem::log.write(ex.what());
+			}
 		else this->processFilename(dent->d_name,_ext.length());
 	}
 
@@ -172,7 +194,7 @@ bool renamer::validate_name(std::string &str,size_t defis)
 			str.insert(0,"0");
 		}
 	}
-	else if(length > 10 || length < 12)
+	if(length > 10 || length < 12)
 	{
 		if(str[10] == '-')
 		{
@@ -229,14 +251,14 @@ std::string renamer::processFilename(const char *name,size_t ext_size)
 		if(gDir.length() != 0)
 			newpath += gDir;
 		newname += (name + (strlen(name) - ext_size));
-		(log += "Move good dir [") += (cDir+name += "] to [") += (newpath += newname) + "]\n";
+		(log += "Move file [") += (cDir+name += "] to good dir [") += (newpath += newname) + "]\n";
 	}
 	else
 	{
 		this->total_bad++;
 		newname += (name + (strlen(name) - ext_size));
 		newpath += bDir;
-		(log += "Move error dir [") += (cDir+name += "] to [") += (newpath += newname) + "]\n";
+		(log += "Move file [") += (cDir+name += "] to error dir [") += (newpath += newname) + "]\n";
 	}
 	std::cout << log;
 	Filesystem::log.write(log);
