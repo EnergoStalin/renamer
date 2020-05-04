@@ -13,7 +13,8 @@
 ## Conditions
 #### Preprocessing
 > Preprocessing remove all charaters from name exclude '-' and replace associations with it
-switch (name[i]) //name is original (const char *) string
+
+```switch (name[i]) //name is original (const char *) string
 {
 	case 'b': newname += '6'; break;
 	case 'q': case 'g': newname += '9'; break;
@@ -24,7 +25,8 @@ switch (name[i]) //name is original (const char *) string
 	case 'O': case 'o': case ')': newname += '0'; break;
 	case 'B': newname += '8'; break;
 	case '-': newname += '-'; defis++; break;
-}
+}```
+
 ###### Good file criteria
 > Example *005456349-12** or **005456349-1**\
 - If has exactly one defis chareter
