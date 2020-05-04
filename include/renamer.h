@@ -13,6 +13,9 @@
 #define RENAMER_STRING_BUFFER_SIZE 256
 
 class renamer {
+	//bool
+	bool rename = true;
+	//
 	std::vector<std::string> ignore; //ignored files
 	std::vector<std::string> ext; //file extension to be processed
 	std::string gDir; //store good files
@@ -29,8 +32,6 @@ class renamer {
 	enum PARSE_ARGUMENTS_RETURN_CODE
 	{
 		ERROR_NOT_ENOUGH_ARGS = 1,
-		ERROR_BAD_DIR_NOT_SPECIFIED,
-		ERROR_GOOD_DIR_NOT_SPECIFIED,
 		ERROR_NO_IGNORED_FILES_SPECIFIED,
 		ERROR_CANT_PARSE_FILE,
 		ERROR_NO_FILES_EXTENSION_SPECIFIED,
@@ -44,7 +45,7 @@ class renamer {
 	PARSE_ARGUMENTS_RETURN_CODE parseArguments(int,const char**);
 	std::string processFilename(const char*,size_t);
 	bool check_param();
-	bool validate_name(std::string&);
+	bool validate_name(std::string&,size_t);
 	void fileToVector(const char*,std::vector<std::string>&,char);
 	void stringToVector(std::string s,std::vector<std::string> &v,char delim);
 	int processDir();
