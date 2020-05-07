@@ -14,28 +14,28 @@ Filesystem::Filesystem() {}
 			switch(GetLastError())
 			{
 				case ERROR_ALREADY_EXISTS:
-					throw FilesystemException(std::string("Directory not created '") + name + "'.\n[Warning]: Directory allready exist.",ERROR_ALREADY_EXISTS);
+					throw FilesystemException(std::string("Directory not created '") + name + "'.\n[Warning]: Directory allready exist.",0);
 				break;
 				case ERROR_PATH_NOT_FOUND:
-					throw FilesystemException(std::string("Unable create directory '") + name + "'.\n[Error]: Path doesent exist.",-1);
+					throw FilesystemException(std::string("Unable create directory '") + name + "'. Reason: Path dont exist.",-1);
 				break;
 			}
 	}
 	void Filesystem::_rename(const char *oldname,const char *newname)
 	{
-		rename(oldname,newname);
-		switch(GetLastError())
-		{
-			case EACCES:
-				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: No acess to this path.",-1);
-			break;
-			case ENOENT:
-				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: Path doesent exist.",-1);
-			break;
-			case EEXIST:
-				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: File exist.",-1);
-			break;
-		}
+		if(rename(oldname,newname) != 0)
+			switch(errno)
+			{
+				case EACCES:
+					throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'. Reason: No acess to this path.",-1);
+				break;
+				case ENOENT:
+					throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'. Reason: Path dont exist.",-1);
+				break;
+				case EEXIST:
+					throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'. Reason: File exist.",0);
+				break;
+			}
 	}
 //if linux will use this
 #elif defined(__linux__) || defined(__unix__)
@@ -46,46 +46,45 @@ Filesystem::Filesystem() {}
 
 	void Filesystem::_mkdir(const char *name)
 	{
-		mkdir(name,0);
-		switch(errno)
-		{
-			case ENOTDIR:
-				throw FilesystemException(std::string("Unable create directory '") + name + "'.\n[Error]: Path component is not directory.",-1);
-			break;
-			case ENAMETOOLONG:
-				throw FilesystemException(std::string("Unable create direcory '") + name + "'.\n[Error] Too long name.",-1);
-			break;
-			case EROFS:
-				throw FilesystemException(std::string("Unable create directory '") + name + "'.\n[Error]: Directory read only.",-1);
-			break;
-			case EEXIST:
-				throw FilesystemException(std::string("Directory not created '") + name + "'.\n[Warning]: Directory allready exist.",EEXIST);
-			break;
-			case ENOENT:
-				throw FilesystemException(std::string("Unable create directory '") + name + "'.\n[Error]: Path doesent exist.",-1);
-			break;
-			case EACCES:
-				throw FilesystemException(std::string("Unable create directory '") + name + "'.\n[Error]: No acess to this path.",-1);
-			break;
-		}
-
+		if(mkdir(name,0) == -1)
+			switch(errno)
+			{
+				case ENOTDIR:
+					throw FilesystemException(std::string("Unable create directory '") + name + "'. Reason: Path component is not directory.",-1);
+				break;
+				case ENAMETOOLONG:
+					throw FilesystemException(std::string("Unable create direcory '") + name + "'. Reason: Too long name.",-1);
+				break;
+				case EROFS:
+					throw FilesystemException(std::string("Unable create directory '") + name + "'. Reason: Directory read only.",-1);
+				break;
+				case EEXIST:
+					throw FilesystemException(std::string("Directory not created '") + name + "'. [Warning]: Directory allready exist.",0);
+				break;
+				case ENOENT:
+					throw FilesystemException(std::string("Unable create directory '") + name + "'. Reason: Path dont exist.",-1);
+				break;
+				case EACCES:
+					throw FilesystemException(std::string("Unable create directory '") + name + "'. Reason: No acess to this path.",-1);
+				break;
+			}
 	}
 	void Filesystem::_rename(const char *oldname,const char *newname)
 	{
-		rename(oldname,newname);
-		switch(errno)
-		{
-			case EACCES:
-				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: No acess to this path.",-1);
-			break;
-			case EEXIST:
-				throw FilesystemException(std::string("File with same name exist '") + oldname + "'\t'" + newname + "'.\n[Warning]: File exist.", 0);
-			break;
-			case ENOTNAM:
-				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: Not in the same disk.",-1);
-			break;
-			case ETXTBSY: case EBUSY: throw FilesystemException(std::string("One of this files busy '") + oldname + "'\t'" + "'\n[Warning]: Files busy.",-1);
-		}
+		if(rename(oldname,newname) != 0)
+			switch(errno)
+			{
+				case EACCES:
+					throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'. Reason: No acess to this path.",-1);
+				break;
+				case EEXIST:
+					throw FilesystemException(std::string("File with same name exist '") + oldname + "'\t'" + newname + "'. [Warning]: File exist.", 0);
+				break;
+				case ENOTNAM:
+					throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'. Reason: Not in the same disk.",-1);
+				break;
+				case ETXTBSY: case EBUSY: throw FilesystemException(std::string("One of this files busy '") + oldname + "'\t'" + "'\n[Warning]: Files busy.",-1);
+			}
 	}
 
 

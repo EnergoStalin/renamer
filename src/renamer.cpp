@@ -186,12 +186,13 @@ int renamer::processDir()
 
 		if(this->rename == true)
 		{
+			std::string oldname2 = "";
 			bool success = false;
-			int num = 0;
-			oldname.clear();
-			(oldname += cDir) += dent->d_name;
+			int num = 1;
 			do
 			{
+				oldname.clear();
+				(oldname += cDir) += dent->d_name;
 				try
 				{
 					Filesystem::_rename(oldname.c_str(), filename.c_str());
@@ -201,13 +202,37 @@ int renamer::processDir()
 				{
 					std::cout << ex.what();
 					Filesystem::log.write(ex.what());
-					if(ex.getCode() == EEXIST)
+					if(ex.getCode() == 0)
 					{
-						filename.clear();
-						(((filename += cDir) += bDir) += dent->d_name).erase(ei+cDir.length()+bDir.length(),_ext.length());
-						(filename += std::to_string(num)) += _ext;
+						std::cout << "Solution move:\n";
+						Filesystem::log.write("Solution move:\n");
+						do
+						{
+							try
+							{
+								Filesystem::_rename(filename.c_str(),oldname2.c_str());
+								success = true;
+							}
+							catch(Filesystem::FilesystemException &ex)
+							{
+								oldname2 = (cDir + bDir) += filename.substr(filename.rfind(Filesystem::slash));
+								oldname2.insert(oldname2.length()-_ext.length(),std::string("dup") += std::to_string(num));
+								num++;
+							}
+						}
+						while(!success);
+						success = false;
+						std::cout << "\t[" << filename << "] -> [" << oldname2 << "]\n";
+						Filesystem::log.write("\t[" + filename + "] -> [" + oldname2 + "]\n");
+						oldname2.clear();
+						oldname2 = filename;
+						filename = (cDir + bDir) += filename.substr(filename.rfind(Filesystem::slash)+1);
+						filename.insert(filename.length()-_ext.length(),std::string("dup") += std::to_string(num));
+						std::cout << "\t[" << oldname2 << "] -> [" << filename << "]\n";
+						Filesystem::log.write("\t[" + oldname2 + "] -> [" + filename + "]\n");
 						num++;
 					}
+					else success = true;
 				}
 			}
 			while(!success);
@@ -290,6 +315,8 @@ std::string renamer::processFilename(const char *name,size_t ext_size)
 	}
 	std::cout << log;
 	Filesystem::log.write(log);
+	
+	newpath += newname;
 
 	return newpath;
 }
