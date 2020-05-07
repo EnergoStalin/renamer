@@ -20,7 +20,6 @@ void Log::open(std::string const file)
 			this->filename += file;
 		}
 }
-
 void Log::write(std::string const msg)
 {
 	if(this->_os.is_open())
