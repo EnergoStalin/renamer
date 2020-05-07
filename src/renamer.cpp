@@ -27,7 +27,6 @@ int renamer::run(int &argc,char const *argv[])
 			code = this->processDir();
 		}
 	log.clear();
-	
 
 	
 	
