@@ -24,6 +24,12 @@ int renamer::run(int &argc,char const *argv[])
 		if(this->check_param())
 		{
 			Filesystem::log.write(log);
+			
+			std::cout << "\n[Notice]: Good dir is " << ((gDir.empty()) ? cDir : gDir) << ".\n";
+			Filesystem::log.write("[Notice]: Good dir is " + ((gDir.empty()) ? cDir : gDir) + ".\n");
+			std::cout << "[Notice]: Bad dir is " << bDir << ".\n\n";
+			Filesystem::log.write("[Notice]: Bad dir is " + bDir + ".\n\n");
+			
 			code = this->processDir();
 		}
 	log.clear();
@@ -81,14 +87,7 @@ bool renamer::check_param()
 		std::cerr << "[Error]: Must be 1 or more file extension.\n";
 		Filesystem::log.write("[Error]: Must be 1 or more file extension.\n");
 		may_continue = 0;
-	}
-	if(may_continue == 1)
-	{
-		std::cout << "\n[Notice]: Good dir is " << ((gDir.empty()) ? cDir : gDir) << ".\n";
-		Filesystem::log.write("[Notice]: Good dir is " + ((gDir.empty()) ? cDir : gDir) + ".\n");
-		std::cout << "[Notice]: Bad dir is " << bDir << ".\n\n";
-		Filesystem::log.write("[Notice]: Bad dir is " + bDir + ".\n\n");
-	}		
+	}	
 
 	return may_continue;
 }
@@ -115,7 +114,7 @@ int renamer::processDir()
 		{
 			log.clear();
 			Filesystem::_mkdir((cDir+gDir).c_str());
-			(((log += "[Warinig]: Directory '") += cDir) += gDir) += "' dont exist creating...\n";
+			(((log += "[Warinig]: Directory '") += cDir) += gDir) += "' dont exist creating...\n\n";
 			std::cout << log;
 			Filesystem::log.write(log);
 		}
@@ -133,7 +132,7 @@ int renamer::processDir()
 	{
 		log.clear();
 		Filesystem::_mkdir((cDir+bDir).c_str());
-		(((log += "[Warinig]: Directory '") += cDir) += bDir) += "' dont exist creating...\n";
+		(((log += "[Warinig]: Directory '") += cDir) += bDir) += "' dont exist creating...\n\n";
 		std::cout << log;
 		Filesystem::log.write(log);
 	}
