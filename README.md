@@ -39,5 +39,5 @@ switch (name[i]) //name is original (const char *) string
 #### Bad file criteria
 > Example _after preprocessing stage_ *0054449-1** or **0054563493**
 - If has zero or more one defis chareter.
-- If length without ~~extension~~ '_.txt_' lower than 8 and or grather than 13.
+- If length without ~~extension '_.txt_'~~ lower than 8 and or grather than 13.
 - Or if not starts with *'005'*.
