@@ -69,8 +69,8 @@ bool renamer::check_param()
 	}
 	if(bDir == "error/")
 	{
-		std::cerr << "[Warning]: Bad directory must be specified.\n";
-		Filesystem::log.write("[Warning]: Bad directory must be specified.\n");
+		std::cerr << "[Warning]: Bad directory not specified.\n";
+		Filesystem::log.write("[Warning]: Bad directory not specified.\n");
 	}
 	if(gDir.length() == 0)
 	{
@@ -105,14 +105,26 @@ int renamer::processDir()
 
 	try
 	{
+		log.clear();
 		if(gDir.length() != 0)
 		{
-			log.clear();
 			Filesystem::_mkdir((cDir+gDir).c_str());
 			(((log += "[Warinig]: Directory '") += cDir) += gDir) += "' dont exist creating...\n";
 			std::cout << log;
 			Filesystem::log.write(log);
 		}
+	}
+	catch(Filesystem::FilesystemException &ex)
+	{
+		if(ex.getCode() == -1)
+		{
+			std::cerr << ex.what();
+			Filesystem::log.write(ex.what());
+			return CANT_CREATE_DIR;
+		}
+	}
+	try
+	{
 		log.clear();
 		Filesystem::_mkdir((cDir+bDir).c_str());
 		(((log += "[Warinig]: Directory '") += cDir) += bDir) += "' dont exist creating...\n";
@@ -123,7 +135,7 @@ int renamer::processDir()
 	{
 		if(ex.getCode() == -1)
 		{
-			std::cerr << ex.what() << '\n';
+			std::cerr << ex.what();
 			Filesystem::log.write(ex.what());
 			return CANT_CREATE_DIR;
 		}
@@ -134,9 +146,10 @@ int renamer::processDir()
 	
 	dirent *dent;
 	size_t ei = 0; //Extension index
-	std::string _ext, filename;
+	std::string _ext, filename,oldname;
 	_ext.reserve(10);
 	filename.reserve(200);
+	oldname.reserve(200);
 	while((dent = readdir(dir)))
 	{
 		//Clear buffers
@@ -165,17 +178,37 @@ int renamer::processDir()
 		it = find(this->ext.begin(),this->ext.end(),_ext); //Extension check
 		if(it == this->ext.end()) { continue; }
 
+		filename.clear();
+		filename += this->processFilename(dent->d_name,_ext.length());
+
 		if(this->rename == true)
-			try
+		{
+			bool success = false;
+			int num = 0;
+			oldname.clear();
+			(oldname += cDir) += dent->d_name;
+			do
 			{
-				Filesystem::_rename((this->cDir+dent->d_name).c_str(), this->processFilename(dent->d_name,_ext.length()).c_str());
+				try
+				{
+					Filesystem::_rename(oldname.c_str(), filename.c_str());
+					success = true;
+				}
+				catch(Filesystem::FilesystemException &ex)
+				{
+					std::cout << ex.what();
+					Filesystem::log.write(ex.what());
+					if(ex.getCode() == EEXIST)
+					{
+						filename.clear();
+						(((filename += cDir) += bDir) += dent->d_name).erase(ei+cDir.length()+bDir.length(),_ext.length());
+						(filename += std::to_string(num)) += _ext;
+						num++;
+					}
+				}
 			}
-			catch(Filesystem::FilesystemException &ex)
-			{
-				std::cout << ex.what();
-				Filesystem::log.write(ex.what());
-			}
-		else this->processFilename(dent->d_name,_ext.length());
+			while(!success);
+		}
 	}
 
 	closedir(dir);
@@ -186,27 +219,23 @@ int renamer::processDir()
 bool renamer::validate_name(std::string &str,size_t defis)
 {
 	int length = str.length();
-	if(defis <= 0) return false;
-	if(length == 9)
+	if(defis != 1 || length < 10 || length > 13) return false;
+	int d_index = str.rfind('-');
+	// std::cout << "\n\n\n\n\nString: " << str << "\nLength: " << length << '\n' << "Digits after defis: " << length - d_index << '\n';
+	if(str.find("05") == 0)
 	{
-		if(str.find("05") == 0)
-		{
 			str.insert(0,"0");
-		}
 	}
-	if(length > 10 || length < 12)
+	if(length - d_index < 4)
 	{
-		if(str[10] == '-')
+		if(str.find("005") == 0)
 		{
-			if(str.substr(0,3) == "005")
-			{
-				return true;
-			}
-			else
-			{
-				str.replace(0,3,"005");
-				return false;
-			}
+			return true;
+		}
+		else
+		{
+			str.replace(0,3,"005");
+			return false;
 		}
 	}
 	else
@@ -344,13 +373,17 @@ renamer::PARSE_ARGUMENTS_RETURN_CODE renamer::parseArguments(int argc, const cha
 					try
 					{
 						Filesystem::_mkdir((cDir+"logs").c_str());
+						std::cerr << "[Warning]: Directory '" << cDir << "logs/' dont exist. It will be created.\n";
+						Filesystem::log.write((std::string("[Warning]: Directory '") += cDir) += "logs/' dont exist. It will be created.\n");
 					}
 					catch(Filesystem::FilesystemException &ex)
 					{
-						std::cerr << ex.what();
-						Filesystem::log.write(ex.what()+"\n");
-
-						return CANT_CREATE_DIR;
+						if(ex.getCode() == -1)
+						{
+							std::cerr << ex.what();
+							Filesystem::log.write(ex.what());
+							return CANT_CREATE_DIR;
+						}
 					}
 					Filesystem::log.open(log.c_str());
 					if(!Filesystem::log.is_open())

@@ -45,7 +45,7 @@ Filesystem::Filesystem() {}
 
 	void Filesystem::_mkdir(const char *name)
 	{
-		mkdir(name,0)
+		mkdir(name,0);
 		switch(errno)
 		{
 			case ENOTDIR:
@@ -71,19 +71,19 @@ Filesystem::Filesystem() {}
 	}
 	void Filesystem::_rename(const char *oldname,const char *newname)
 	{
-		rename(oldname,newname)
+		rename(oldname,newname);
 		switch(errno)
 		{
 			case EACCES:
 				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: No acess to this path.",-1);
 			break;
 			case EEXIST:
-				throw FilesystemException(std::string("File with same name exist '") + oldname + "'\t'" + newname + "'.\n[Warning]: File exist.", EEXIST);
+				throw FilesystemException(std::string("File with same name exist '") + oldname + "'\t'" + newname + "'.\n[Warning]: File exist.", 0);
 			break;
 			case ENOTNAM:
 				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: Not in the same disk.",-1);
 			break;
-			case ETXTBSY: case EBUSY: throw FilesystemException(std::string("One of this files busy '") + oldname + "'\t'" + "'\n[Warning]: Files busy.");
+			case ETXTBSY: case EBUSY: throw FilesystemException(std::string("One of this files busy '") + oldname + "'\t'" + "'\n[Warning]: Files busy.",-1);
 		}
 	}
 
@@ -103,7 +103,7 @@ Filesystem::FilesystemException::FilesystemException(std::string const msg,int c
 
 std::string Filesystem::FilesystemException::what()
 {
-	return this->msg + " code - " + std::to_string(this->code);
+	return this->msg + " code - " + std::to_string(this->code) + "\n";
 }
 
 int Filesystem::FilesystemException::getCode()

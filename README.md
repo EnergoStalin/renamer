@@ -13,7 +13,7 @@
 > **_Warning!!!_ I recommend this arguments order and forbid variate it. -nr Position doesen't matter.**
 ## Conditions
 #### Preprocessing
-> Preprocessing remove all charaters from name exclude '-' and replace associations with it.
+> Preprocessing remove all charaters from name exclude '-' and replace associations with it. And if filename starts with **_'05'_** inserts in the beginning _'0'_.
 
 ```c++
 switch (name[i]) //name is original (const char *) string
@@ -33,10 +33,10 @@ switch (name[i]) //name is original (const char *) string
 #### Good file criteria
 > Example _after preprocessing stage_ *005456349-12** or **005456349-1**
 - If has exactly one defis chareter.
-- If length without ~~extension~~ '_.txt_' equals 9 and starts with *'05'* if starts with *'05'* inserts *'0'* in the beginning.
-- Or if length equals 11 and starts with *'005'*
+- If length without ~~extension~~ '_.txt_' grather than 10 and lower than 14.
+- If digits count after defis lower than **3** and starts with **'005'**
 #### Bad file criteria
 > Example _after preprocessing stage_ *0054456349-12** or **0054563493-1**
 - If has more one defis chareter or zero.
-- If length without ~~extension~~ '_.txt_' equals less than 9 and dont starts with *'05'*.
-- Or if length not equals 11 and not starts with *'005'*
+- If length without ~~extension~~ '_.txt_' lower than 10 and or grather than 13.
+- Or if not starts with *'005'*. **In that case replaces forward 3 characters to _'005'_**
