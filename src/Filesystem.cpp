@@ -19,8 +19,6 @@ Filesystem::Filesystem() {}
 				case ERROR_PATH_NOT_FOUND:
 					throw FilesystemException(std::string("Unable create directory '") + name + "'.\n[Error]: Path doesent exist.",-1);
 				break;
-				default:
-				break;
 			}
 	}
 	void Filesystem::_rename(const char *oldname,const char *newname)
@@ -33,6 +31,9 @@ Filesystem::Filesystem() {}
 			break;
 			case ENOENT:
 				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: Path doesent exist.",-1);
+			break;
+			case EEXIST:
+				throw FilesystemException(std::string("Unable rename file '") + oldname + "' to '" + newname + "'.\n[Error]: File exist.",-1);
 			break;
 		}
 	}

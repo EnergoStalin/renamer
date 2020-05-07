@@ -82,6 +82,13 @@ bool renamer::check_param()
 		Filesystem::log.write("[Error]: Must be 1 or more file extension.\n");
 		may_continue = 0;
 	}
+	if(may_continue == 1)
+	{
+		std::cout << "\n[Notice]: Good dir is " << ((gDir.empty()) ? cDir : gDir) << ".\n";
+		Filesystem::log.write("[Notice]: Good dir is " + ((gDir.empty()) ? cDir : gDir) + ".\n");
+		std::cout << "[Notice]: Bad dir is " << bDir << ".\n\n";
+		Filesystem::log.write("[Notice]: Bad dir is " + bDir + ".\n\n");
+	}		
 
 	return may_continue;
 }
@@ -102,24 +109,24 @@ int renamer::processDir()
 		return CANT_OPEN_DIR;
 	}
 
-	try
+	if(gDir.length() != 0)
 	{
-		log.clear();
-		if(gDir.length() != 0)
+		try
 		{
+			log.clear();
 			Filesystem::_mkdir((cDir+gDir).c_str());
 			(((log += "[Warinig]: Directory '") += cDir) += gDir) += "' dont exist creating...\n";
 			std::cout << log;
 			Filesystem::log.write(log);
 		}
-	}
-	catch(Filesystem::FilesystemException &ex)
-	{
-		if(ex.getCode() == -1)
+		catch(Filesystem::FilesystemException &ex)
 		{
-			std::cerr << ex.what();
-			Filesystem::log.write(ex.what());
-			return CANT_CREATE_DIR;
+			if(ex.getCode() == -1)
+			{
+				std::cerr << ex.what();
+				Filesystem::log.write(ex.what());
+				return CANT_CREATE_DIR;
+			}
 		}
 	}
 	try
@@ -157,8 +164,6 @@ int renamer::processDir()
 
 		//Check if dir
 		if(dent->d_type == DT_DIR) continue;
-
-		if(dent->d_name[0] != 'n') continue;
 
 		//Set filename to buffer
 		filename += dent->d_name;
@@ -218,29 +223,25 @@ int renamer::processDir()
 bool renamer::validate_name(std::string &str,size_t defis)
 {
 	int length = str.length();
-	if(defis != 1 || length < 10 || length > 13) return false;
-	int d_index = str.rfind('-');
-	// std::cout << "\n\n\n\n\nString: " << str << "\nLength: " << length << '\n' << "Digits after defis: " << length - d_index << '\n';
+	if(defis != 1 || length <= 7) return false; //0054085569-2
 	if(str.find("05") == 0)
 	{
-			str.insert(0,"0");
+		str.insert(0,"0");
+		length++;
 	}
-	if(length - d_index < 4)
+	else if(str.find("5") == 0)
 	{
-		if(str.find("005") == 0)
-		{
-			return true;
-		}
-		else
-		{
+		str.insert(0,"00");
+		length += 2;
+	}
+	if(length > 13) return false;
+	int d_index = str.rfind('-');
+	if((length - d_index) <= 3)
+	{
+		if(str.find("005") != 0)
 			str.replace(0,3,"005");
-			return false;
-		}
 	}
-	else
-	{
-		return false;
-	}
+	else return false;
 
 	// if(defis == 1 && newname.find("005") == 0 && (newname.length()-newname.find_last_of('-')) == 2)
 
@@ -279,14 +280,14 @@ std::string renamer::processFilename(const char *name,size_t ext_size)
 		if(gDir.length() != 0)
 			newpath += gDir;
 		newname += (name + (strlen(name) - ext_size));
-		(log += "Move file [") += (cDir+name += "] to good dir [") += (newpath += newname) + "]\n";
+		((((((log += "File [") += name) += "] -> [") += newname) += "] -> [") += newpath) += "]\n";
 	}
 	else
 	{
 		this->total_bad++;
 		newname += (name + (strlen(name) - ext_size));
 		newpath += bDir;
-		(log += "Move file [") += (cDir+name += "] to error dir [") += (newpath += newname) + "]\n";
+		((((((log += "File [") += name) += "] -> [") += newname) += "] -> [") += newpath) += "]\n";
 	}
 	std::cout << log;
 	Filesystem::log.write(log);
@@ -311,14 +312,14 @@ void renamer::fileToVector(char const *file,std::vector<std::string> &v,char del
 
 void renamer::Usage()
 {
-		std::cout << "Usage: renamer [DIR] -g [GOOD DIR] -b [BAD DIR] -e [FILE EXTENSIONS] -i [IGNORED FILES] -wl [FORMAT] -nr\n" 
-		<< "Renames files in specified directory by pattern and puts it in specified bad folder or specified good folder.\n"
+		std::cout << "Usage: renamer [DIR] [-g GOOD DIR] [-b BAD DIR] [-e or -ef(read file mode) FILE EXTENSIONS] [-i or -if(read file mode) IGNORED FILES] [-wl FORMAT] [-nr]\n" 
+		<< "Renames files in specified directory by pattern(who you coud not change) and puts it in specified bad folder or specified good folder.\n"
 		<< "If good dir not specified puts renamed files at the same folder, if bad dir not specified creates error dir in working directory and puts bad files in it.\n"
 		<< "File extensions must starts with dot and be in file with -ef or be splitted by ',' with -e flag.\n"
 		<< "-wl Flag enable logging who creates 'logs' directory and puts to it all logs who been writed. You may specify log filename. Format you can see here 'http://www.cplusplus.com/reference/ctime/strftime/'\n"
 		<< "-i Specifies the same as -e flag ignored files also may be read from file whos also ignored if extension match such as '.txt'\n"
 		<< "-nr Flag used for debug it disbales rename and leaves only 'preprocessing' filenames.\n"
-		<< "Warning!!! I recommend this arguments order and forbid variate it. -nr Position doesen't matter.\n\n";
+		<< "Warning!!! I recommend this arguments order and forbid variate it. [-nr] Position doesen't matter.\n\n";
 }
 
 void renamer::stringToVector(std::string s,std::vector<std::string> &v,char delim)
@@ -364,14 +365,13 @@ renamer::PARSE_ARGUMENTS_RETURN_CODE renamer::parseArguments(int argc, const cha
 						std::cerr << "[Error]: Wrong arguments order.\n";
 						return ERROR_ARGUMENT_ORDER;
 					}
-					log += cDir;
-					log += "logs/";
+					log += "./logs/";
 					log += std::string(time_string);
 					log += ".log";
 
 					try
 					{
-						Filesystem::_mkdir((cDir+"logs").c_str());
+						Filesystem::_mkdir("./logs");
 						std::cerr << "[Warning]: Directory '" << cDir << "logs/' dont exist. It will be created.\n";
 						Filesystem::log.write((std::string("[Warning]: Directory '") += cDir) += "logs/' dont exist. It will be created.\n");
 					}
